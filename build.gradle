@@ -1,0 +1,70 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.2'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'war'
+	id 'com.bmuschko.cargo' version '2.9.0'
+}
+
+group = 'com.opentext.ia'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+
+	tomcat
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	tomcat "org.apache.tomcat:tomcat:10.1.18@zip"
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+bootWar {
+	archiveBaseName = 'infoarchive-webapp'
+	version = ''
+	archiveClassifier = ''
+}
+
+cargo {
+	containerId = 'tomcat10x'
+	port = 9090
+
+	deployable {
+		file = file('build/libs/infoarchive-webapp.war')
+	}
+
+	local {
+		installer {
+			installConfiguration = configurations.tomcat
+			downloadDir = file("${layout.buildDirectory.get()}/tomcat-download")
+			extractDir = file("${layout.buildDirectory.get()}/tomcat")
+		}
+
+		configFile {
+			files = project.files('src/main/tomcat/conf/tomcat-users.xml')
+			toDir = 'conf'
+		}
+	}
+}
