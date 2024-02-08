@@ -66,5 +66,12 @@ cargo {
 			files = project.files('src/main/tomcat/conf/tomcat-users.xml')
 			toDir = 'conf'
 		}
+
+		systemProperties {
+			property 'spring.config.location',
+					file("${layout.projectDirectory.asFile.absolutePath}/src/main/tomcat/webapp/infoarchive-webapp").toURI().toString()
+		}
 	}
 }
+
+cargoRedeployLocal.dependsOn bootWar
